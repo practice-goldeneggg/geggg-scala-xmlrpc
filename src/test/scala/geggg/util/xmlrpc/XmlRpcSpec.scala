@@ -38,13 +38,13 @@ class XmlRpcSpec extends FunSpec with BeforeAndAfterAll {
       it("should be error by empty url") {
         intercept[Exception] {
           val c = XmlRpc("")
-          fail("empty url cannot be blank")
+          fail("url cannot be blank")
         }
       }
       it("should be error by empty encoding") {
         intercept[Exception] {
           val c = XmlRpc(URL, "")
-          fail("empty encoding cannot be blank")
+          fail("encoding cannot be blank")
         }
       }
     }
