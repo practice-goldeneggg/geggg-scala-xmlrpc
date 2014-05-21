@@ -9,7 +9,7 @@ trait XmlRpc {
   require(baseUrl != "")
   require(encoding != "")
 
-  def simpleCall[A](method: String, params: Any*): A
+  def call[A](method: String, params: Any*): A
 
   def call[A, B](method: String, params: Any*)(converter: A => B): B
 

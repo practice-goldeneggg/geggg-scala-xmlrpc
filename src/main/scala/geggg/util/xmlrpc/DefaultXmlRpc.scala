@@ -20,11 +20,11 @@ class DefaultXmlRpc(val url: String, val enc: String) extends {
   implicit def anys2objects(anys: Seq[Any]) =
     anys.map { _.asInstanceOf[Object] }.toArray
 
-  def simpleCall[A](method: String, params: Any*): A = {
+  def call[A](method: String, params: Any*): A = {
     client.execute(method, params).asInstanceOf[A]
   }
 
   def call[A, B](method: String, params: Any*)(converter: A => B): B =
-    converter(simpleCall(method, params: _*))
+    converter(call(method, params: _*))
 
 }

@@ -51,45 +51,74 @@ class XmlRpcSpec extends FunSpec with BeforeAndAfterAll {
 
   }
 
-  describe("Method execute using simpleCall") {
+  describe("Method execute using call") {
     describe("when handler is CalcHandler") {
       it("should return correct Int value 'add' method") {
-        client.simpleCall[Int]("CalcHandler.add", 1, 2) shouldEqual 3
+        client.call[Int]("CalcHandler.add", 1, 2) shouldEqual 3
       }
       it("should return correct Int value 'subtract' method") {
-        client.simpleCall[Int]("CalcHandler.subtract", 1, 2) shouldEqual -1
+        client.call[Int]("CalcHandler.subtract", 1, 2) shouldEqual -1
       }
       it("should return correct Double value 'subtract' method") {
-        client.simpleCall[Double]("CalcHandler.divide", 1, 2) shouldEqual 0.5
+        client.call[Double]("CalcHandler.divide", 1, 2) shouldEqual 0.5
       }
     }
 
     describe("when handler is StringHandler") {
       it("should return correct String value 'concat' method") {
-        client.simpleCall[String]("StringHandler.concat", "a", "b") shouldEqual "ab"
+        client.call[String]("StringHandler.concat", "a", "b") shouldEqual "ab"
       }
       it("should return correct Boolean value 'length' method") {
-        client.simpleCall[Boolean]("StringHandler.compare", "あ", "い") shouldEqual false
-        client.simpleCall[Boolean]("StringHandler.compare", "あ", "あ") shouldEqual true
-        clientWithEnc.simpleCall[Boolean]("StringHandler.compare", "あ", "あ") shouldEqual true
+        client.call[Boolean]("StringHandler.compare", "あ", "い") shouldEqual false
+        client.call[Boolean]("StringHandler.compare", "あ", "あ") shouldEqual true
+        clientWithEnc.call[Boolean]("StringHandler.compare", "あ", "あ") shouldEqual true
       }
     }
 
     describe("when handler is CollectionHandler") {
       it("should return correct Map value 'toMap' method") {
         client
-          .simpleCall[Map[String, String]]("CollectionHandler.toMap", "ア", "イ") shouldEqual Map("ア" -> "イ")
+          .call[Map[String, String]]("CollectionHandler.toMap", "ア", "イ") shouldEqual Map("ア" -> "イ")
         clientWithEnc
-          .simpleCall[Map[String, String]]("CollectionHandler.toMap", "ア", "イ") shouldEqual Map("ア" -> "イ")
+          .call[Map[String, String]]("CollectionHandler.toMap", "ア", "イ") shouldEqual Map("ア" -> "イ")
       }
       it("should return correct List value 'listReverse' method") {
         client
-          .simpleCall[List[Int]]("CollectionHandler.listReverse", List(1, 2, 3)) shouldEqual List(3, 2, 1)
+          .call[List[Int]]("CollectionHandler.listReverse", List(1, 2, 3)) shouldEqual List(3, 2, 1)
       }
     }
   }
 
-  describe("Method execute using call") {
-    // TODO
+  describe("Method execute using call with converting result") {
+    describe("when handler is CalcHandler") {
+      it("should return correct Int value 'add' method") {
+        val cc = client.call[Int, CalcConverted]("CalcHandler.add", 1, 2) { result =>
+          CalcConverted(result)
+        }
+        cc.num shouldEqual 3
+      }
+    }
+
+    describe("when handler is StringHandler") {
+      it("should return correct String value 'concat' method") {
+        val sc = client.call[String, StringConverted]("StringHandler.concat", "a", "b") { result =>
+          StringConverted(result)
+        }
+        sc.str shouldEqual "ab"
+      }
+    }
+
+    describe("when handler is CollectionHandler") {
+      it("should return correct List value 'listReverse' method") {
+        val lc =  client.call[List[Int], ListConverted]("CollectionHandler.listReverse", List(1, 2, 3)) { result =>
+          ListConverted(result.toArray)
+        }
+        lc.array shouldEqual Array(3, 2, 1)
+      }
+    }
   }
 }
+
+case class CalcConverted(num: Int)
+case class StringConverted(str: String)
+case class ListConverted(array: Array[Int])
